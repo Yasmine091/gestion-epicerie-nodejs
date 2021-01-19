@@ -1,0 +1,24 @@
+{
+  "name": "gestion-epicerie-nodejs",
+  "version": "1.0.0",
+  "description": "brief nodejs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/labege_carbonne/gestion-epicerie-nodejs"
+  },
+  "author": "philippe Pereira",
+  "license": "MIT",
+  "engines": {
+    "node": "12.x"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "sqlite3": "^5.0.1"
+  }
+}

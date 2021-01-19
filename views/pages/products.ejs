@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<head>
+    <%- include('../partials/head'); %>
+</head>
+
+<body>
+
+    <header>
+        <%- include('../partials/navbar'); %>
+    </header>
+
+    <main class="container pb-5">
+        <h1 class="text-center mt-3">Produits</h1>
+        <h2>Liste des produits :</h2>
+        <div class="row">
+            <% products.forEach((product) => { %>
+            <div class="card m-2 p-1 shadow-sm" style="width: 18rem;">
+                <img src="<%= product.thumbnail_url %>" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h3 class="h5 card-title"><%= product.name %> 
+                        <span class="badge bg-secondary"><%= product.price %> €</span>
+                    </h3>
+                    <p class="card-text"><%= product.info %></p>
+                    <% if(product.quantity > 0){ %>
+                        <span class="badge bg-success">Disponible</span>
+                    <% } else { %>
+                        <span class="badge bg-danger">Indisponible</span>
+                    <% } %>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+    </main>
+
+    <footer>
+        <%- include('../partials/footer'); %>
+    </footer>
+
+</body>
+
+</html>

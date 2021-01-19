@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<head>
+    <%- include('../partials/head'); %>
+</head>
+
+<body>
+
+    <header>
+        <%- include('../partials/navbar'); %>
+    </header>
+
+    <main class="container pb-5">
+        <h1 class="text-center mt-3">Inventaire</h1>
+        <% if(!showCreateProduct && !showUpdateProduct){ %>
+            <a href="/inventory/newProduct" class="btn btn-primary float-end" tabindex="-1" role="button" aria-disabled="true">Ajouter un produit</a>
+        <% } %>
+
+        <% if(showCreateProduct){ %>
+        <div>
+            <%- include('../partials/addProduct'); %>
+        </div>
+        <% } %>
+
+        <% if(showUpdateProduct){ %>
+        <div>
+            <%- include('../partials/updateProduct'); %>
+        </div>
+        <% } %>
+
+        <div>
+            <h2>Liste des produits :</h2>
+            <div class="row">
+                <% products.forEach((product) => { %>
+                <div class="card m-2 p-1 shadow-sm" style="width: 18rem;">
+                    <img src="<%= product.thumbnail_url %>" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h3 class="h5 card-title"><%= product.name %>
+                            <span class="badge bg-secondary"><%= product.price %> €</span>
+                            <span class="badge bg-secondary">Qté: <%= product.quantity %></span>
+                        </h3>
+                        <p class="card-text"><%= product.info %></p>
+                        <% if(!showUpdateProduct){ %>
+                        <a href="/inventory/<%= product.id %>" class="btn btn-success">Modifier</a>
+                        <a href="/inventory/delete/<%= product.id %>" class="btn btn-danger">Supprimer</a>
+                        <% } %>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <div class="col-6">
+
+        </div>
+
+    </main>
+
+    <footer>
+        <%- include('../partials/footer'); %>
+    </footer>
+
+</body>
+
+</html>
