@@ -12,9 +12,11 @@
 
     <main class="container pb-5">
         <h1 class="text-center mt-3">Produits</h1>
-        <h2>Liste des produits :</h2>
+        <h2>Liste des produits frais :</h2>
         <div class="row">
-            <% products.forEach((product) => { %>
+            <% fresh_products.forEach((product) => { 
+                if((new Date(product.dlc)) >= (new Date())) {
+                    %>
             <div class="card m-2 p-1 shadow-sm" style="width: 18rem;">
                 <img src="<%= product.thumbnail_url %>" class="card-img-top" alt="...">
                 <div class="card-body">
@@ -22,14 +24,19 @@
                         <span class="badge bg-dark float-end"><%= product.price %> €</span>
                     </h3>
                     <p class="card-text"><%= product.info %></p>
+                    <span class="badge bg-warning float-start">Date limite: <%=
+                        new Date(product.dlc).getDate() + "/" +
+                        new Date(product.dlc).getMonth()+1 + "/" +
+                        new Date(product.dlc).getFullYear();
+                    %></span>
                     <% if(product.quantity > 0){ %>
-                        <span class="badge bg-success">Disponible</span>
-                    <% } else { %>
-                        <span class="badge bg-danger">Indisponible</span>
-                    <% } %>
+                        <span class="badge bg-success float-end">Disponible</span>
+                        <% } else { %>
+                            <span class="badge bg-danger float-end">Indisponible</span>
+                            <% } %>
                 </div>
             </div>
-            <% }); %>
+            <% }}); %>
         </div>
     </main>
 

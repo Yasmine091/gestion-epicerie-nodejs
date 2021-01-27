@@ -11,47 +11,120 @@
     </header>
 
     <main class="container pb-5">
+        <div class="row">
+        <div class="col">
         <h1 class="text-center mt-3">Inventaire</h1>
         <% if(!showCreateProduct && !showUpdateProduct){ %>
-            <a href="/inventory/newProduct" class="btn btn-primary float-end" tabindex="-1" role="button" aria-disabled="true">Ajouter un produit</a>
-        <% } %>
+            <a href="/inventory/newProduct" class="btn btn-primary float-end mx-1" tabindex="-1" role="button"
+                aria-disabled="true">Ajouter un produit</a>
+            <% } %>
 
-        <% if(showCreateProduct){ %>
-        <div>
-            <%- include('../partials/addProduct'); %>
-        </div>
-        <% } %>
+                <% if(!showCreateFresh && !showUpdateFresh){ %>
+                    <a href="/inventory/newFresh" class="btn btn-primary float-end mx-1" tabindex="-1" role="button"
+                        aria-disabled="true">Ajouter un produit frais</a>
+                    <% } %>
 
-        <% if(showUpdateProduct){ %>
-        <div>
-            <%- include('../partials/updateProduct'); %>
-        </div>
-        <% } %>
+                        <% if(showCreateProduct){ %>
+                            <div>
+                                <%- include('../partials/addProduct'); %>
+                            </div>
+                            <% } %>
 
-        <div>
-            <h2>Liste des produits :</h2>
-            <div class="row">
-                <% products.forEach((product) => { %>
-                <div class="card m-2 p-1 shadow-sm" style="width: 18rem;">
-                    <img src="<%= product.thumbnail_url %>" class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h3 class="h5 card-title"><%= product.name %>
-                            <span class="badge bg-secondary"><%= product.price %> €</span>
-                            <span class="badge bg-secondary">Qté: <%= product.quantity %></span>
-                        </h3>
-                        <p class="card-text"><%= product.info %></p>
-                        <% if(!showUpdateProduct){ %>
-                        <a href="/inventory/<%= product.id %>" class="btn btn-success">Modifier</a>
-                        <a href="/inventory/delete/<%= product.id %>" class="btn btn-danger">Supprimer</a>
-                        <% } %>
-                    </div>
-                </div>
-                <% }); %>
-            </div>
-        </div>
-        <div class="col-6">
+                                <% if(showCreateFresh){ %>
+                                    <div>
+                                        <%- include('../partials/addFresh'); %>
+                                    </div>
+                                    <% } %>
 
+                                        <% if(showUpdateProduct){ %>
+                                            <div>
+                                                <%- include('../partials/updateProduct'); %>
+                                            </div>
+                                            <% } %>
+
+                                                <% if(showUpdateFresh){ %>
+                                                    <div>
+                                                        <%- include('../partials/updateFresh'); %>
+                                                    </div>
+                                                    <% } %>
         </div>
+        </div>
+
+                                                        <% let i=1; let j=1; %>
+
+                                                            <h2>Liste des produits :</h2>
+                                                            <div class="row">
+                                                                <% products.forEach((product)=> {
+                                                                    if(product.po_id == i) { %>
+                                                                    <div class="card m-2 p-1 shadow-sm"
+                                                                        style="width: 18rem;">
+                                                                        <img src="<%= product.po_thumbnail_url %>"
+                                                                            class="card-img-top" alt="...">
+                                                                        <div class="card-body">
+                                                                            <h3 class="h5 card-title">
+                                                                                <%= product.po_name %>
+                                                                                    <span class="badge bg-dark float-end">
+                                                                                        <%= product.po_price %> €
+                                                                                    </span>
+                                                                                    <span
+                                                                                        class="badge bg-secondary float-end">Qté:
+                                                                                        <%= product.po_quantity %>
+                                                                                            </span>
+                                                                            </h3>
+                                                                            <p class="card-text">
+                                                                                <%= product.po_info %>
+                                                                            </p>
+                                                                            <% if(!showUpdateProduct){ %>
+                                                                                <a href="/inventory/product/<%= product.po_id %>"
+                                                                                    class="btn btn-success">Modifier</a>
+                                                                                <a href="/inventory/delete/product/<%= product.po_id %>"
+                                                                                    class="btn btn-danger">Supprimer</a>
+                                                                                <% i++; } } %>
+                                                                        </div>
+                                                                        <% }); %>
+                                                                    </div>
+                                                            </div>
+
+                                                            <h2>Liste des produits frais:</h2>
+                                                            <div class="row">
+                                                                <% fresh_products.forEach((fresh)=> {
+                                                                    if(fresh.fr_id == j) {
+                                                                    %>
+                                                                    <div class="card m-2 p-1 shadow-sm"
+                                                                        style="width: 18rem;">
+                                                                        <img src="<%= fresh.fr_thumbnail_url %>"
+                                                                            class="card-img-top" alt="...">
+                                                                        <div class="card-body">
+                                                                            <h3 class="h5 card-title">
+                                                                                <%= fresh.fr_name %>
+                                                                                    
+                                                                            <span
+                                                                                class="badge bg-secondary float-end">Qté:
+                                                                                <%= fresh.fr_quantity %></span>
+                                                                                <span class="badge bg-dark float-end">
+                                                                                    <%= fresh.fr_price %> €
+                                                                                </span>
+                                                                            </h3>
+                                                                            <p class="card-text">
+                                                                                <%= fresh.fr_info %>
+                                                                            </p>
+                                                                            <span
+                                                                            class="badge bg-warning d-block">Date limite:
+                                                                            <%=
+                                                                                new Date(fresh.dlc).getDate() + "/" +
+                                                                                new Date(fresh.dlc).getMonth()+1 + "/" +
+                                                                                new Date(fresh.dlc).getFullYear();
+                                                                            %></span><br>
+                                                                            <% if(!showUpdateFresh){ %>
+                                                                                <a href="/inventory/fresh/<%= fresh.fr_id %>"
+                                                                                    class="btn btn-success">Modifier</a>
+                                                                                <a href="/inventory/delete/fresh/<%= fresh.fr_id %>"
+                                                                                    class="btn btn-danger">Supprimer</a>
+                                                                                <% j++; } } %>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% }); %>
+                                                            </div>
 
     </main>
 

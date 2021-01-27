@@ -60,6 +60,20 @@ app.get('/products', (req, res) => {
     });
 });
 
+app.get('/fresh', (req, res) => {
+    const query = `SELECT * FROM fresh_products`;
+    db.all(query, [], (err, rows) => {
+        if (err)
+        {
+            console.error(err.message);
+        }
+
+        res.render('pages/fresh', {
+            fresh_products: rows
+        });
+    });
+});
+
 /**
  * about page
  */
@@ -71,19 +85,24 @@ app.get('/about', (req, res) => {
  * inventory page
  */
 app.get('/inventory', (req, res) => {
-    renderInventory(res)
+    renderInventory(res);
 });
 
 app.get('/inventory/newProduct', (req, res) => {
     resetFormData();
-    renderInventory(res, true);
+    renderInventory(res, true, false);
+});
+
+app.get('/inventory/newFresh', (req, res) => {
+    resetFormData();
+    renderInventory(res, false, true);
 });
 
 // *** CRUD *** //
 /**
  * create product
  */
-app.post('/inventory/create', (req, res) => {
+app.post('/inventory/product/create', (req, res) => {
     const query = `INSERT INTO products (name, thumbnail_url, info, price, quantity)
         VALUES ('${req.body.inputName}', 
             '${req.body.inputThumbNail}',
@@ -104,9 +123,33 @@ app.post('/inventory/create', (req, res) => {
 });
 
 /**
+ * create fresh product
+ */
+app.post('/inventory/fresh/create', (req, res) => {
+    const query = `INSERT INTO fresh_products (name, thumbnail_url, info, price, quantity, dlc)
+        VALUES ('${req.body.inputName}', 
+            '${req.body.inputThumbNail}',
+            '${req.body.inputDesc}',
+            ${req.body.inputPrice},
+            ${req.body.inputQuantity},
+            ${Date.parse(req.body.inputDLC)}
+        )`;
+
+    db.run(query, (err) => {
+        if (err)
+        {
+            return console.error('ici: ', err.message);
+        }
+        console.log('Fresh products successfully created.');
+
+        renderInventory(res);
+    });
+});
+
+/**
  * read product
  */
-app.get('/inventory/:id', (req, res) => {
+app.get('/inventory/product/:id', (req, res) => {
     if (isNaN(req.params.id))
     {
         return;
@@ -138,9 +181,55 @@ app.get('/inventory/:id', (req, res) => {
 
         res.render('pages/inventory', {
             products: rows,
+            fresh_products: rows,
             formData: formData,
             showCreateProduct: false,
-            showUpdateProduct: true
+            showUpdateProduct: true,
+            showCreateFresh: false,
+            showUpdateFresh: false
+        });
+    });
+});
+
+app.get('/inventory/fresh/:id', (req, res) => {
+    if (isNaN(req.params.id))
+    {
+        return;
+    }
+
+    const query = `SELECT * FROM fresh_products WHERE id = ${req.params.id}`;
+    db.all(query, [], (err, rows) => {
+        if (err)
+        {
+            console.error(err.message);
+        }
+
+        if (!rows)
+        {
+            renderInventory(res);
+            return;
+        }
+
+        const data = rows[0];
+
+        formData = {
+            id: data.id,
+            name: data.name,
+            thumbnail_url: data.thumbnail_url,
+            desc: data.info,
+            price: data.price,
+            quantity: data.quantity,
+            dlc: data.dlc
+        }
+
+        res.render('pages/inventory', {
+            fresh_products: rows,
+            products: rows,
+            formData: formData,
+            showCreateFresh: false,
+            showUpdateFresh: true,
+            showCreateProduct: false,
+            showUpdateProduct: false
         });
     });
 });
@@ -148,7 +237,7 @@ app.get('/inventory/:id', (req, res) => {
 /**
  * update product
  */
-app.post('/inventory/update/:id', (req, res) => {
+app.post('/inventory/update/product/:id', (req, res) => {
     const query = `UPDATE products
         SET name = '${req.body.inputName}',
         thumbnail_url = '${req.body.inputThumbNail}',
@@ -172,9 +261,36 @@ app.post('/inventory/update/:id', (req, res) => {
 });
 
 /**
+ * update fresh
+ */
+app.post('/inventory/update/fresh/:id', (req, res) => {
+    const query = `UPDATE fresh_products
+        SET name = '${req.body.inputName}',
+        thumbnail_url = '${req.body.inputThumbNail}',
+        info = '${req.body.inputDesc}',
+        price = ${req.body.inputPrice},
+        quantity = ${req.body.inputQuantity},
+        dlc = ${Date.parse(req.body.inputDLC)}
+        WHERE id = ${req.params.id}
+        `;
+
+    db.run(query, (err) => {
+        if (err)
+        {
+            return console.error(err.message);
+        }
+        console.log('Fresh products successfully updated.');
+
+        resetFormData();
+
+        renderInventory(res);
+    });
+});
+
+/**
  * delete product
  */
-app.get('/inventory/delete/:id', (req, res) => {
+app.get('/inventory/delete/product/:id', (req, res) => {
     if (isNaN(req.params.id))
     {
         return;
@@ -188,6 +304,28 @@ app.get('/inventory/delete/:id', (req, res) => {
             return console.error(err.message);
         }
         console.log('Products successfully deleted.');
+
+        renderInventory(res);
+    });
+});
+
+/**
+ * delete fresh
+ */
+app.get('/inventory/delete/fresh/:id', (req, res) => {
+    if (isNaN(req.params.id))
+    {
+        return;
+    }
+
+    const query = `DELETE FROM fresh_products WHERE id = ${req.params.id};`;
+
+    db.run(query, (err) => {
+        if (err)
+        {
+            return console.error(err.message);
+        }
+        console.log('Fresh products successfully deleted.');
 
         renderInventory(res);
     });
@@ -245,22 +383,31 @@ function populateDB() {
 }
 
 // *** UTILITIES *** //
-function renderInventory(res, showCreateProduct = false) {
+function renderInventory(res, showCreateProduct = false, showCreateFresh = false) {
     resetFormData();
 
-    if (showCreateProduct)
+    if (showCreateProduct || showCreateFresh)
     {
         res.render('pages/inventory', {
             products: [],
             formData: formData,
             showCreateProduct: showCreateProduct,
-            showUpdateProduct: false
+            showUpdateProduct: false,
+            fresh_products: [],
+            showCreateFresh: showCreateFresh,
+            showUpdateFresh: false
         });
 
         return;
     }
 
-    const query = `SELECT * FROM products`;
+    const query = `SELECT *, products.id as po_id, fresh_products.id as fr_id,
+    products.name as po_name, fresh_products.name as fr_name,
+    products.thumbnail_url as po_thumbnail_url, fresh_products.thumbnail_url as fr_thumbnail_url,
+    products.info as po_info, fresh_products.info as fr_info,
+    products.price as po_price, fresh_products.price as fr_price,
+    products.quantity as po_quantity, fresh_products.quantity as fr_quantity
+    FROM products, fresh_products`;
     db.all(query, [], (err, rows) => {
         if (err)
         {
@@ -271,10 +418,14 @@ function renderInventory(res, showCreateProduct = false) {
             products: rows,
             formData: formData,
             showCreateProduct: showCreateProduct,
-            showUpdateProduct: false
+            showUpdateProduct: false,
+            fresh_products: rows,
+            showCreateFresh: showCreateFresh,
+            showUpdateFresh: false
         });
     });
 }
+
 
 function resetFormData() {
     formData = {
@@ -282,6 +433,7 @@ function resetFormData() {
         name: '',
         thumbnail_url: '',
         desc: '',
-        price: 0
+        price: 0,
+        dlc: ''
     };
 }
